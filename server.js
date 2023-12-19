@@ -52,7 +52,8 @@ app.post('/chat', async (req, res) => {
       if (chunk.choices[0]?.delta?.content) {
         const part = chunk.choices[0].delta.content;
         assistantResponse += part;
-        res.write(`data: ${part}\n\n`);
+        // Send a complete JSON object
+        res.write(`data: ${JSON.stringify({ message: part })}\n\n`);
       }
     }
 
