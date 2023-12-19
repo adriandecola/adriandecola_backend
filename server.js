@@ -11,7 +11,7 @@ const port = 4000;
 // Enviroment Variables config
 dotenv.config();
 
-// CORS config 
+// CORS config
 var corsOptions = {
   origin: 'https://chat.adriandecola.com',
   optionsSuccessStatus: 200, // For legacy browser support
@@ -36,7 +36,7 @@ app.post('/chat', async (req, res) => {
     messageHistory.push({ role: 'user', content: userMessage });
 
     const stream = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'ft:gpt-3.5-turbo-1106:personal::8XKVZmJ4',
       messages: messageHistory,
       stream: true,
     });
