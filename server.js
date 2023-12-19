@@ -3,6 +3,7 @@
 import express from 'express';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 const app = express();
 const port = 4000;
@@ -10,8 +11,15 @@ const port = 4000;
 // Enviroment Variables config
 dotenv.config();
 
+// CORS config
+var corsOptions = {
+  origin: 'https://chat.adriandecola.com',
+  optionsSuccessStatus: 200, // For legacy browser support
+};
+
 // Middleware
 app.use(express.json());
+app.use(cors(corsOptions));
 
 // openai config
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
