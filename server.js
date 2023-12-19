@@ -27,6 +27,7 @@ const openai = new OpenAI(process.env.OPENAI_API_KEY);
 /////////////////// Routes ///////////////////
 // Route to hit for chat requests
 app.post('/chat', async (req, res) => {
+  res.json({ message: 'Test response' });
   try {
     const userMessage = req.body.message;
     // Get history from the request or initialize it
