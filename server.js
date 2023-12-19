@@ -64,7 +64,6 @@ app.post('/chat', async (req, res) => {
       `data: ${JSON.stringify({ completeHistory: messageHistory })}\n\n`
     );
     res.end();
-    console.log(messageHistory);
   } catch (error) {
     console.error(error);
     res.status(500).send(error.message);
