@@ -11,15 +11,17 @@ const port = 4000;
 // Enviroment Variables config
 dotenv.config();
 
+/*
 // CORS config
 var corsOptions = {
   origin: 'https://chat.adriandecola.com',
   optionsSuccessStatus: 200, // For legacy browser support
 };
+*/
 
 // Middleware
 app.use(express.json());
-app.use(cors(corsOptions));
+//app.use(cors(corsOptions));
 
 // openai config
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
@@ -80,7 +82,7 @@ app.post('/chat', async (req, res) => {
 });
 
 // Test route
-app.post('/test', cors(corsOptions), (req, res) => {
+app.post('/test', (req, res) => {
   console.log('Test endpoint hit');
   res.json({ message: 'Test response successful' });
 });
