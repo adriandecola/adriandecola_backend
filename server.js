@@ -79,6 +79,12 @@ app.post('/chat', async (req, res) => {
   }
 });
 
+// Test route
+app.post('/test', cors(corsOptions), (req, res) => {
+  console.log('Test endpoint hit');
+  res.json({ message: 'Test response successful' });
+});
+
 // Starting the server
 app.listen(port, 'localhost', () => {
   console.log(`Server listening on port: ${port}`);
