@@ -21,6 +21,9 @@ var corsOptions = {
 app.use(express.json());
 app.use(cors(corsOptions));
 
+// testing
+//
+
 /////// openai configs
 // used for personal website on digital oceans
 const openai_personal = new OpenAI(
