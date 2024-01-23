@@ -17,12 +17,19 @@ var corsOptions = {
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
-// Middleware
+/////// Middleware
 app.use(express.json());
 app.use(cors(corsOptions));
 
-// openai config
-const openai = new OpenAI(process.env.OPENAI_API_KEY);
+/////// openai configs
+// used for personal website on digital oceans
+const openai_personal = new OpenAI(
+  process.env.OPENAI_API_KEY_PERSONAL_DO_SERVER
+);
+// used for Meta Carbon's assistant
+const openai = new OpenAI({
+  organization: process.env.OPENAI_API_KEY_META,
+});
 
 /////////////////// Routes ///////////////////
 // Route to hit for chat requests
@@ -35,7 +42,7 @@ app.post('/chat', async (req, res) => {
     // Add the user's message to the history
     messageHistory.push({ role: 'user', content: userMessage });
 
-    const stream = await openai.chat.completions.create({
+    const stream = await openai_personal.chat.completions.create({
       model: 'ft:gpt-3.5-turbo-1106:personal::8XKVZmJ4',
       messages: messageHistory,
       stream: true,
@@ -77,6 +84,57 @@ app.post('/chat', async (req, res) => {
     console.error(error);
     res.status(500).send(error.message);
   }
+});
+
+// Route to hit for assistant requests
+app.post('/assistant', async (req, res) => {
+  // for testing on Postman
+  const stream = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: "Say this is a test" }],
+    stream: true,
+  });
+  res.json(response: completion.choices[0].message.content);
+  /*
+  try {
+    const userId = req.body.userId; // Assuming user ID is sent in the request
+    const userMessage = req.body.userMessage;
+    if (!userMessage) {
+      return res.status(400).send('No message provided');
+    }
+
+    const threadId = await getOrCreateThreadForUser(userId);
+
+    // Add user's message to the thread
+    await openai_personal.beta.threads.create(
+      {
+        messages: [
+          {
+            role: 'user',
+            content: userMessage,
+          },
+        ],
+      },
+      threadId
+    );
+
+    // Run the assistant
+    const run = await openai_personal.beta.threads.runs.create(threadId, {
+      assistant_id: 'your_assistant_id', // Replace with your Assistant's ID
+    });
+
+    // Retrieve the latest message from the thread, which should be the Assistant's response
+    const thread = await openai_personal.beta.threads.retrieve(threadId);
+    const assistantMessage =
+      thread.messages[thread.messages.length - 1].content;
+
+    // Send back the assistant's response
+    res.json({ response: assistantMessage });
+  } catch (error) {
+    console.error('Error processing message:', error);
+    res.status(500).send('Server error');
+  }
+  */
 });
 
 // Test route
