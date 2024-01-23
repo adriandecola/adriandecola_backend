@@ -90,11 +90,11 @@ app.post('/chat', async (req, res) => {
 app.post('/assistant', async (req, res) => {
   // for testing on Postman
   const stream = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: "Say this is a test" }],
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: 'Say this is a test' }],
     stream: true,
   });
-  res.json(response: completion.choices[0].message.content);
+  res.json({ response: completion.choices[0].message.content });
   /*
   try {
     const userId = req.body.userId; // Assuming user ID is sent in the request
