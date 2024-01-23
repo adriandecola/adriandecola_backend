@@ -27,13 +27,14 @@ app.use(cors(corsOptions));
 /////// openai configs
 // used for personal website on digital oceans
 const openai_personal = new OpenAI({
-  organization: process.env.OPENAI_API_KEY_PERSONAL_ORG,
+  organization: process.env.OPENAI_PERSONAL_ORG,
   apiKey: process.env.OPENAI_API_KEY_PERSONAL_DO_SERVER,
 });
 
 // used for Meta Carbon's assistant
 const openai = new OpenAI({
-  organization: process.env.OPENAI_API_KEY_META,
+  organization: process.env.OPENAI_META_ORG,
+  apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
 
 /////////////////// Routes ///////////////////
