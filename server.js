@@ -146,3 +146,5 @@ app.post('/test', (req, res) => {
 app.listen(port, 'localhost', () => {
   console.log(`Server listening on port: ${port}`);
 });
+
+// to get PM2 to run this again
