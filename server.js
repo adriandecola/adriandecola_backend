@@ -89,10 +89,9 @@ app.post('/chat', async (req, res) => {
 // Route to hit for assistant requests
 app.post('/assistant', async (req, res) => {
   // for testing on Postman
-  const stream = await openai.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [{ role: 'user', content: 'Say this is a test' }],
-    stream: true,
   });
   res.json({ response: completion.choices[0].message.content });
   /*
