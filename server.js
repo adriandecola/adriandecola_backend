@@ -142,6 +142,7 @@ app.post('/assistant', async (req, res) => {
       threadId,
       firstMessageId
     );
+    console.log('Assistant Message Object: ', assistantMessageObject);
 
     // Getting the assistants text value response
     const assistantMessage =
