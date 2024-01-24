@@ -145,8 +145,7 @@ app.post('/assistant', async (req, res) => {
     console.log('Assistant Message Object: ', assistantMessageObject);
 
     // Getting the assistants text value response
-    const assistantMessage =
-      assistantMessageObject.response.content[0].text.value;
+    const assistantMessage = assistantMessageObject.content[0].text.value;
 
     // Send back the assistant's response
     res.json({ response: assistantMessage });
