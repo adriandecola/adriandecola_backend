@@ -134,6 +134,7 @@ app.post('/assistant', async (req, res) => {
     // Retrieve the thread messages
     const threadMessages = await openai.beta.threads.messages.list(threadId);
     console.log('Thread Messages:', threadMessages);
+    console.log('Type of Thread Messages:', typeof threadMessages);
 
     // Getting the most recent message ID
     const lastMessageId = threadMessages.last_id;
