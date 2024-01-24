@@ -103,6 +103,7 @@ app.post('/chat', async (req, res) => {
 
 // Route to hit for assistant requests
 app.post('/assistant', async (req, res) => {
+  console.log('Assistant endpoint hit! ');
   try {
     // Getting the passed over user message
     const userMessage = req.body.message;
