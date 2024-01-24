@@ -32,7 +32,7 @@ var corsOptions = {
 
 /////// Middleware ///////
 app.use(express.json());
-app.use(cors(corsOptions));
+app.use(cors());
 
 /////// openai configs ///////
 // used for personal website on digital oceans
