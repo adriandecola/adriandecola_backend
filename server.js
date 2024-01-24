@@ -12,14 +12,16 @@ const port = 4000;
 dotenv.config();
 
 /////// CORS config ///////
-// CORS config with dynamic origin check
 var corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      'http://chat.adriandecola.com',
-      'http://assistant.adriandecola.com',
-    ];
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (
+      [
+        'https://chat.adriandecola.com',
+        'http://assistant.adriandecola.com',
+      ].indexOf(origin) !== -1 ||
+      !origin
+    ) {
+      console.log('CORs passed');
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
