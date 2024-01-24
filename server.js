@@ -112,12 +112,13 @@ app.post('/assistant', async (req, res) => {
     const userMessage = req.body.message;
 
     // Getting threadId if one was created
+    let threadId; //function scope
     if (req.body.treadId) {
-      const threadId = req.body.threadId;
+      threadId = req.body.threadId;
     } else {
       // Creating a thread
       const thread = await openai.beta.threads.create();
-      const threadId = thread.id;
+      threadId = thread.id;
     }
 
     // Adding the message
