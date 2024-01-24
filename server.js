@@ -180,3 +180,24 @@ app.post('/test', (req, res) => {
 app.listen(port, 'localhost', () => {
   console.log(`Server listening on port: ${port}`);
 });
+
+/////////////////// Helper Functions ///////////////////
+function calculateCarbonFootprint(flightDistance, averagePassengers) {
+  console.log('calculateCarbonFootprint function called');
+  // Constants
+  const fuelConsumptionPerKm = 0.03; // Example value, needs to be defined based on aircraft type and other factors
+  const additionalKerosene = 1100; // 1.1 tons in kg
+  const co2PerKgOfFuel = 3.1;
+
+  // Calculate total kerosene needed
+  let totalKerosene =
+    flightDistance * fuelConsumptionPerKm + additionalKerosene;
+
+  // Calculate total CO2 emissions
+  let totalCO2Emissions = totalKerosene * co2PerKgOfFuel;
+
+  // Calculate individual's CO2 contribution
+  let individualContribution = totalCO2Emissions / averagePassengers;
+
+  return individualContribution;
+}
