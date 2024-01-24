@@ -117,7 +117,7 @@ app.post('/assistant', async (req, res) => {
     );
 
     // Running the assistant on the thread
-    const run = await openai.beta.threads.runs.create(threadId, {
+    let run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: assistantId,
     });
     // its a constant each time the endpoints hit
