@@ -13,7 +13,10 @@ dotenv.config();
 
 /////// CORS config ///////
 var corsOptions = {
-  origin: 'https://cha.adriandecola.com',
+  origin: [
+    'https://chat.adriandecola.com',
+    'http://assistant.adriandecola.com',
+  ],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
