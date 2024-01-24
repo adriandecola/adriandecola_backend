@@ -21,7 +21,7 @@ var corsOptions = {
       ].indexOf(origin) !== -1 ||
       !origin
     ) {
-      console.log('CORs passed');
+      console.log('Origin:', origin);
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
