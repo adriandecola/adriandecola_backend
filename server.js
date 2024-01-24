@@ -133,18 +133,19 @@ app.post('/assistant', async (req, res) => {
 
     // Retrieve the thread messages
     const threadMessages = await openai.beta.threads.messages.list(threadId);
-    console.log('Thread Messages:', threadMessages);
-    console.log('Type of Thread Messages:', typeof threadMessages);
 
     // Getting the most recent message ID
-    const lastMessageId = threadMessages.body.first_id;
-    console.log('Last Message ID:', lastMessageId);
+    const firstMessageId = threadMessages.body.first_id;
 
-    // Getting the latest message, which is the assistants response
-    const assistantMessage = await openai.beta.threads.messages.retrieve(
+    // Getting the most recent message, which is the assistants response
+    const assistantMessageObject = await openai.beta.threads.messages.retrieve(
       threadId,
-      lastMessageId
+      firstMessageId
     );
+
+    // Getting the assistants text value response
+    const assistantMessage =
+      assistantMessageObject.response.content[0].text.value;
 
     // Send back the assistant's response
     res.json({ response: assistantMessage });
