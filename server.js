@@ -13,7 +13,7 @@ dotenv.config();
 
 /////// CORS config ///////
 var corsOptions = {
-  origin: 'https://chat.adriandecola.com',
+  origin: 'https://cha.adriandecola.com',
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
@@ -143,7 +143,6 @@ app.post('/assistant', async (req, res) => {
       threadId,
       firstMessageId
     );
-    console.log('Assistant Message Object: ', assistantMessageObject);
 
     // Getting the assistants text value response
     const assistantMessage = assistantMessageObject.content[0].text.value;
