@@ -47,7 +47,7 @@ const openai = new OpenAI({
   organization: process.env.OPENAI_META_ORG,
   apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
-const assistantId = 'asst_GYlHGWVbAVRtJ0FxO8mo7uT2';
+const assistantId = 'asst_4xgRtT4KkJks7hNohWIYEf41';
 
 /////// Setting up a thread for the assistant ///////
 /////// later I will put this in session for user and create it when ///////
