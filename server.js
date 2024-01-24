@@ -8,34 +8,42 @@ import cors from 'cors';
 const app = express();
 const port = 4000;
 
-// Enviroment Variables config
+/////// Enviroment Variables config ///////
 dotenv.config();
 
-// CORS config
+/////// CORS config ///////
 var corsOptions = {
   origin: 'https://chat.adriandecola.com',
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
-/////// Middleware
+/////// Middleware ///////
 app.use(express.json());
 app.use(cors(corsOptions));
 
-// testing
-//
-
-/////// openai configs
+/////// openai configs ///////
 // used for personal website on digital oceans
 const openai_personal = new OpenAI({
   organization: process.env.OPENAI_PERSONAL_ORG,
   apiKey: process.env.OPENAI_API_KEY_PERSONAL_DO_SERVER,
 });
-
 // used for Meta Carbon's assistant
 const openai = new OpenAI({
   organization: process.env.OPENAI_META_ORG,
   apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
+const assistantId = asst_GYlHGWVbAVRtJ0FxO8mo7uT2;
+
+/////// Setting up a thread for the assistant ///////
+/////// later I will put this in session for user and create it when ///////
+/////// the /assistant endpoint is actually hit? ///////
+/////// or when the page/plugin is loaded? ///////
+try {
+  const thread = await openai.beta.threads.create();
+  const threadId = thread.id;
+} catch (err) {
+  console.error(err);
+}
 
 /////////////////// Routes ///////////////////
 // Route to hit for chat requests
@@ -94,52 +102,51 @@ app.post('/chat', async (req, res) => {
 
 // Route to hit for assistant requests
 app.post('/assistant', async (req, res) => {
-  // for testing on Postman
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: 'Say this is a test' }],
-  });
-  res.json({ response: completion.choices[0].message.content });
-  /*
   try {
-    const userId = req.body.userId; // Assuming user ID is sent in the request
-    const userMessage = req.body.userMessage;
-    if (!userMessage) {
-      return res.status(400).send('No message provided');
-    }
+    // Getting the passed over user message
+    const userMessage = req.body.message;
 
-    const threadId = await getOrCreateThreadForUser(userId);
-
-    // Add user's message to the thread
-    await openai_personal.beta.threads.create(
+    // Adding the message
+    const userMessageObject = await openai.beta.threads.messages.create(
+      threadId,
       {
-        messages: [
-          {
-            role: 'user',
-            content: userMessage,
-          },
-        ],
-      },
-      threadId
+        role: 'user',
+        content: userMessage,
+      }
     );
 
-    // Run the assistant
-    const run = await openai_personal.beta.threads.runs.create(threadId, {
-      assistant_id: 'your_assistant_id', // Replace with your Assistant's ID
+    // Running the assistant on the thread
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: assistant.id,
     });
+    // its a constant each time the endpoints hit
+    const runId = run.id;
 
-    // Retrieve the latest message from the thread, which should be the Assistant's response
-    const thread = await openai_personal.beta.threads.retrieve(threadId);
-    const assistantMessage =
-      thread.messages[thread.messages.length - 1].content;
+    // Waiting for run to complete
+    while (run.status != 'completed') {
+      await sleep(250); // Wait for quarter of a second
+      // Retrieving the run again
+      run = await openai.beta.threads.runs.retrieve(threadId, runId);
+    }
+
+    // Retrieve the thread messages
+    const threadMessages = await openai.beta.threads.messages.list(threadId);
+
+    // Getting the most recent message ID
+    const lastMessageId = threadMessages.last_id;
+
+    // Getting the latest message, which is the assistants response
+    const assistantMessage = await openai.beta.threads.messages.retrieve(
+      threadId,
+      lastMessageId
+    );
 
     // Send back the assistant's response
     res.json({ response: assistantMessage });
   } catch (error) {
-    console.error('Error processing message:', error);
+    console.error('Error processing message: ', error);
     res.status(500).send('Server error');
   }
-  */
 });
 
 // Test route
