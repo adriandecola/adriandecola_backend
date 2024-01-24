@@ -125,7 +125,8 @@ app.post('/assistant', async (req, res) => {
 
     // Waiting for run to complete
     while (run.status != 'completed') {
-      await sleep(3000); // Wait for three seconds , can test making this shorter later
+      // Wait for three seconds using a Promise with setTimeout
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       // Retrieving the run again
       run = await openai.beta.threads.runs.retrieve(threadId, runId);
     }
