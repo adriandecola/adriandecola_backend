@@ -137,7 +137,7 @@ app.post('/assistant', async (req, res) => {
     console.log('Type of Thread Messages:', typeof threadMessages);
 
     // Getting the most recent message ID
-    const lastMessageId = threadMessages.last_id;
+    const lastMessageId = threadMessages.ThreadMessagesPage.last_id;
     console.log('Last Message ID:', lastMessageId);
 
     // Getting the latest message, which is the assistants response
