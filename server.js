@@ -49,18 +49,6 @@ const openai = new OpenAI({
 });
 const assistantId = 'asst_4xgRtT4KkJks7hNohWIYEf41';
 
-/////// Setting up a thread for the assistant ///////
-/////// later I will put this in session for user and create it when ///////
-/////// the /assistant endpoint is actually hit? ///////
-/////// or when the page/plugin is loaded? ///////
-let threadId; // global scope
-try {
-  const thread = await openai.beta.threads.create();
-  threadId = thread.id;
-} catch (err) {
-  console.error(err);
-}
-
 /////////////////// Routes ///////////////////
 // Route to hit for chat requests
 app.post('/chat', async (req, res) => {
@@ -123,6 +111,15 @@ app.post('/assistant', async (req, res) => {
     // Getting the passed over user message
     const userMessage = req.body.message;
 
+    // Getting threadId if one was created
+    if (req.body.treadId) {
+      const threadId = req.body.threadId;
+    } else {
+      // Creating a thread
+      const thread = await openai.beta.threads.create();
+      const threadId = thread.id;
+    }
+
     // Adding the message
     const userMessageObject = await openai.beta.threads.messages.create(
       threadId,
@@ -162,8 +159,8 @@ app.post('/assistant', async (req, res) => {
     // Getting the assistants text value response
     const assistantMessage = assistantMessageObject.content[0].text.value;
 
-    // Send back the assistant's response
-    res.json({ response: assistantMessage });
+    // Send back the assistant's response and threadId
+    res.json({ response: assistantMessage, threadId: threadId });
   } catch (error) {
     console.error('Error processing message: ', error);
     res.status(500).send('Server error');
