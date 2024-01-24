@@ -38,9 +38,10 @@ const assistantId = 'asst_GYlHGWVbAVRtJ0FxO8mo7uT2';
 /////// later I will put this in session for user and create it when ///////
 /////// the /assistant endpoint is actually hit? ///////
 /////// or when the page/plugin is loaded? ///////
+let threadId; // global scope
 try {
   const thread = await openai.beta.threads.create();
-  const threadId = thread.id;
+  threadId = thread.id;
 } catch (err) {
   console.error(err);
 }
