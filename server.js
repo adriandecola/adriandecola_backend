@@ -110,6 +110,7 @@ app.post('/assistant', async (req, res) => {
   try {
     // Getting the passed over user message
     const userMessage = req.body.message;
+    console.log('req.body.threadID: ', req.body.threadId);
 
     // Getting threadId if one was created
     let threadId; //function scope
@@ -164,6 +165,7 @@ app.post('/assistant', async (req, res) => {
 
     // Getting the assistants text value response
     const assistantMessage = assistantMessageObject.content[0].text.value;
+    console.log('Assistant Message: ', assistantMessage);
 
     // Send back the assistant's response and threadId
     res.json({ response: assistantMessage, threadId: threadId });
