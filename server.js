@@ -115,7 +115,7 @@ app.post('/assistant', async (req, res) => {
 
     // Getting threadId if one was created
     let threadId; //function scope
-    if (req.body.treadId) {
+    if (req.body.threadId) {
       console.log('in IF');
       threadId = req.body.threadId;
     } else {
