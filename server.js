@@ -111,6 +111,7 @@ app.post('/assistant', async (req, res) => {
     // Getting the passed over user message
     const userMessage = req.body.message;
     console.log('req.body.threadID: ', req.body.threadId);
+    console.log();
 
     // Getting threadId if one was created
     let threadId; //function scope
@@ -122,6 +123,7 @@ app.post('/assistant', async (req, res) => {
       threadId = thread.id;
     }
     console.log('threadId: ', threadId);
+    console.log();
 
     // Adding the message
     const userMessageObject = await openai.beta.threads.messages.create(
@@ -147,14 +149,17 @@ app.post('/assistant', async (req, res) => {
       run = await openai.beta.threads.runs.retrieve(threadId, runId);
     }
     console.log('Run Completed');
+    console.log();
 
     // Retrieve the thread messages
     const threadMessages = await openai.beta.threads.messages.list(threadId);
     console.log('Thread Message: ', threadMessages);
+    console.log();
 
     // Getting the most recent message ID
     const firstMessageId = threadMessages.body.first_id;
     console.log('Fist Message ID: ', firstMessageId);
+    console.log();
 
     // Getting the most recent message, which is the assistants response
     const assistantMessageObject = await openai.beta.threads.messages.retrieve(
@@ -162,10 +167,12 @@ app.post('/assistant', async (req, res) => {
       firstMessageId
     );
     console.log('Assistant Message Object: ', assistantMessageObject);
+    console.log();
 
     // Getting the assistants text value response
     const assistantMessage = assistantMessageObject.content[0].text.value;
     console.log('Assistant Message: ', assistantMessage);
+    console.log();
 
     // Send back the assistant's response and threadId
     res.json({ response: assistantMessage, threadId: threadId });
