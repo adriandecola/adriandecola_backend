@@ -29,10 +29,14 @@ var corsOptions = {
   },
   optionsSuccessStatus: 200, // For legacy browser support
 };
+const corsOptionsAllAllowed = {
+  origin: '*', // This allows all origins
+  optionsSuccessStatus: 200, // For legacy browser support
+};
 
 /////// Middleware ///////
 app.use(express.json());
-app.use(cors()); /////////////
+app.use(cors(corsOptionsAllAllowed)); /////////////
 ///////////// Temporarily turned off CORs cuz it so annoying
 /////////////
 
@@ -111,7 +115,7 @@ app.post('/assistant', async (req, res) => {
     // Getting the passed over user message
     const userMessage = req.body.message;
     console.log('req.body.threadID: ', req.body.threadId);
-    console.log(' ');
+    console.log('\n');
 
     // Getting threadId if one was created
     let threadId; //function scope
@@ -125,7 +129,7 @@ app.post('/assistant', async (req, res) => {
       threadId = thread.id;
     }
     console.log('threadId: ', threadId);
-    console.log();
+    console.log('\n');
 
     // Adding the message
     const userMessageObject = await openai.beta.threads.messages.create(
@@ -151,17 +155,17 @@ app.post('/assistant', async (req, res) => {
       run = await openai.beta.threads.runs.retrieve(threadId, runId);
     }
     console.log('Run Completed');
-    console.log();
+    console.log('\n');
 
     // Retrieve the thread messages
     const threadMessages = await openai.beta.threads.messages.list(threadId);
     console.log('Thread Message: ', threadMessages);
-    console.log();
+    console.log('\n');
 
     // Getting the most recent message ID
     const firstMessageId = threadMessages.body.first_id;
     console.log('Fist Message ID: ', firstMessageId);
-    console.log();
+    console.log('\n');
 
     // Getting the most recent message, which is the assistants response
     const assistantMessageObject = await openai.beta.threads.messages.retrieve(
@@ -169,12 +173,12 @@ app.post('/assistant', async (req, res) => {
       firstMessageId
     );
     console.log('Assistant Message Object: ', assistantMessageObject);
-    console.log();
+    console.log('\n');
 
     // Getting the assistants text value response
     const assistantMessage = assistantMessageObject.content[0].text.value;
     console.log('Assistant Message: ', assistantMessage);
-    console.log();
+    console.log('\n\n');
 
     // Send back the assistant's response and threadId
     res.json({ response: assistantMessage, threadId: threadId });
