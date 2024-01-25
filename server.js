@@ -144,11 +144,14 @@ app.post('/assistant', async (req, res) => {
     let run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: assistantId,
     });
+    console.log('Running');
     // its a constant each time the endpoints hit
     const runId = run.id;
 
+    let i = 0;
     // Waiting for run to complete
     while (run.status != 'completed') {
+      console.log('Run still in progress, try: ', i);
       // Wait for three seconds using a Promise with setTimeout
       await new Promise((resolve) => setTimeout(resolve, 3000));
       // Retrieving the run again
