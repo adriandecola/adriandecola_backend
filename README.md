@@ -1,0 +1,1 @@
+Hey, this is the backend for my website. As of now, its just a Node + Express App hosted on api.adriandecola.com. An enviroment variables file (.env) is used to hide any secrets/keys. So, for now, I see no reason why it can't be public.
