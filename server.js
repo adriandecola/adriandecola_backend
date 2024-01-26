@@ -51,7 +51,7 @@ const openai = new OpenAI({
   organization: process.env.OPENAI_META_ORG,
   apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
-const assistantId = 'asst_4xgRtT4KkJks7hNohWIYEf41';
+const assistantId = process.env.OPENAI_ASSISTANT_ID;
 
 /////////////////// Routes ///////////////////
 // Route to hit for chat requests
@@ -156,6 +156,7 @@ app.post('/assistant', async (req, res) => {
       await new Promise((resolve) => setTimeout(resolve, 3000));
       // Retrieving the run again
       run = await openai.beta.threads.runs.retrieve(threadId, runId);
+      i = i++;
     }
     console.log('Run Completed');
     console.log('\n');
