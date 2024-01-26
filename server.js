@@ -52,6 +52,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
 const assistantId = process.env.OPENAI_ASSISTANT_ID;
+console.log('AssitantId: ', assistantId);
 
 /////////////////// Routes ///////////////////
 // Route to hit for chat requests
