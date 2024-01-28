@@ -51,7 +51,7 @@ const openai = new OpenAI({
   organization: process.env.OPENAI_META_ORG,
   apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
-const assistantId = process.env.OPENAI_ASSISTANT_ID;
+const assistantId = process.env.OPENAI_ASSISTANT_FORM_FILLER_ID;
 console.log('AssitantId: ', assistantId);
 
 /////////////////// Routes ///////////////////
@@ -205,6 +205,29 @@ app.listen(port, 'localhost', () => {
 });
 
 /////////////////// Helper Functions ///////////////////
+async function fillCompanyForm(formData) {
+  // Check if at least one of the specified fields is provided
+  const { companyName, numEmployees } = formData;
+  if (!companyName && !numEmployees) {
+    throw new Error(
+      "At least one of 'companyName' or 'numEmployees' must be provided."
+    );
+  }
+
+  // Log the provided information
+  console.log(`Form Details:
+  Company Name: ${companyName || 'Not provided'},
+  Number of Employees: ${numEmployees || 'Not provided'}`);
+
+  // Handle the form data as needed (e.g., save to a database)
+
+  // Return the response
+  return {
+    success: true,
+    message: `Form submitted successfully with the provided information.`,
+  };
+}
+
 function calculateCarbonFootprint(flightDistance, averagePassengers) {
   console.log('calculateCarbonFootprint function called');
   // Constants
