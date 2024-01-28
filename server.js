@@ -169,18 +169,25 @@ app.post('/assistant', async (req, res) => {
         for (const toolCall of toolCalls) {
           const functionName = toolCall.function.name;
           const args = JSON.parse(toolCall.function.arguments);
+          let output;
 
-          if (typeof this[functionName] === 'function') {
-            // Directly calling the function if it's in the same scope
-            const output = await this[functionName](args);
-            toolOutputs.push({
-              tool_call_id: toolCall.id,
-              output: output,
-            });
-          } else {
-            console.log(`Function ${functionName} is not defined.`);
-            return 'Failure';
+          switch (functionName) {
+            case 'fillCompanyForm':
+              output = await fillCompanyForm(args);
+              break;
+            case 'calculateCarbonFootprint':
+              output = await calculateCarbonFootprint(args);
+              break;
+            default:
+              console.error(`Function ${functionName} is not defined.`);
+              output = 'Failure';
+              break;
           }
+
+          toolOutputs.push({
+            tool_call_id: toolCall.id,
+            output: output,
+          });
         }
 
         // Submitting the tool call outputs
@@ -241,7 +248,7 @@ app.listen(port, 'localhost', () => {
 });
 
 /////////////////// Helper Functions ///////////////////
-async function fillCompanyForm(formData) {
+function fillCompanyForm(formData) {
   // Check if at least one of the specified fields is provided
   const { companyName, numEmployees } = formData;
   if (!companyName && !numEmployees) {
