@@ -153,10 +153,45 @@ app.post('/assistant', async (req, res) => {
     // Waiting for run to complete
     while (run.status != 'completed') {
       console.log('Run still in progress, try: ', i);
-      // Wait for three seconds using a Promise with setTimeout
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Wait for two seconds using a Promise with setTimeout
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       // Retrieving the run again
       run = await openai.beta.threads.runs.retrieve(threadId, runId);
+
+      // Checking if the run reuqires action (function call)
+      if (
+        run.status === 'requires_action' &&
+        run.required_action.type === 'submit_tool_outputs'
+      ) {
+        const toolCalls = run.required_action.submit_tool_outputs.tool_calls;
+        let toolOutputs = [];
+
+        for (const toolCall of toolCalls) {
+          const functionName = toolCall.function.name;
+          const args = JSON.parse(toolCall.function.arguments);
+
+          if (typeof window[functionName] === 'function') {
+            const output = await window[functionName](args);
+            toolOutputs.push({
+              tool_call_id: toolCall.id,
+              output: output,
+            });
+          } else {
+            console.log(`Function ${functionName} is not defined.`);
+            return 'Failure';
+          }
+        }
+
+        // Submitting the tool call outputs
+        run = await openai.beta.threads.runs.submitToolOutputs(
+          threadId,
+          run.id,
+          {
+            tool_outputs: toolOutputs,
+          }
+        );
+      }
+      // Incrementing for console.logging
       i = i++;
     }
     console.log('Run Completed');
@@ -209,9 +244,10 @@ async function fillCompanyForm(formData) {
   // Check if at least one of the specified fields is provided
   const { companyName, numEmployees } = formData;
   if (!companyName && !numEmployees) {
-    throw new Error(
+    console.log(
       "At least one of 'companyName' or 'numEmployees' must be provided."
     );
+    return 'Failure';
   }
 
   // Log the provided information
@@ -222,10 +258,7 @@ async function fillCompanyForm(formData) {
   // Handle the form data as needed (e.g., save to a database)
 
   // Return the response
-  return {
-    success: true,
-    message: `Form submitted successfully with the provided information.`,
-  };
+  return 'Success';
 }
 
 function calculateCarbonFootprint(flightDistance, averagePassengers) {
