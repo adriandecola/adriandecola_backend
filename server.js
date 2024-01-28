@@ -170,8 +170,9 @@ app.post('/assistant', async (req, res) => {
           const functionName = toolCall.function.name;
           const args = JSON.parse(toolCall.function.arguments);
 
-          if (typeof window[functionName] === 'function') {
-            const output = await window[functionName](args);
+          if (typeof this[functionName] === 'function') {
+            // Directly calling the function if it's in the same scope
+            const output = await this[functionName](args);
             toolOutputs.push({
               tool_call_id: toolCall.id,
               output: output,
