@@ -112,6 +112,10 @@ app.post('/chat', async (req, res) => {
 // Route to hit for assistant requests
 app.post('/assistant', async (req, res) => {
   console.log('Assistant endpoint hit! ');
+
+  // To be filled with formData if assistant calls the correct function
+  let formData = null;
+
   try {
     // Getting the passed over user message
     const userMessage = req.body.message;
@@ -158,7 +162,7 @@ app.post('/assistant', async (req, res) => {
       // Retrieving the run again
       run = await openai.beta.threads.runs.retrieve(threadId, runId);
 
-      // Checking if the run reuqires action (function call)
+      // Checking if the run requires action (function call)
       if (
         run.status === 'requires_action' &&
         run.required_action.type === 'submit_tool_outputs'
@@ -173,7 +177,11 @@ app.post('/assistant', async (req, res) => {
 
           switch (functionName) {
             case 'fillCompanyForm':
-              output = await fillCompanyForm(args);
+              let functionData = fillCompanyForm(args);
+              output = functionData.successStatus;
+              if (output === 'Success') {
+                formData = functionData.formData;
+              }
               break;
             case 'calculateCarbonFootprint':
               output = await calculateCarbonFootprint(args);
@@ -228,8 +236,17 @@ app.post('/assistant', async (req, res) => {
     console.log('Assistant Message: ', assistantMessage);
     console.log('\n\n');
 
-    // Send back the assistant's response and threadId
-    res.json({ response: assistantMessage, threadId: threadId });
+    // Send back the assistant's response and threadId with form data if given
+    if (formData) {
+      console.log('Returning form data: ', formData);
+      res.json({
+        response: assistantMessage,
+        threadId: threadId,
+        formData: formData,
+      });
+    } else {
+      res.json({ response: assistantMessage, threadId: threadId });
+    }
   } catch (error) {
     console.error('Error processing message: ', error);
     res.status(500).send('Server error');
@@ -249,24 +266,32 @@ app.listen(port, 'localhost', () => {
 
 /////////////////// Helper Functions ///////////////////
 function fillCompanyForm(formData) {
-  // Check if at least one of the specified fields is provided
   const { companyName, numEmployees } = formData;
+
+  // Check if at least one of the specified fields is provided
   if (!companyName && !numEmployees) {
     console.log(
       "At least one of 'companyName' or 'numEmployees' must be provided."
     );
-    return 'Failure';
+    return {
+      successStatus: 'Failure',
+      formData: null,
+    };
   }
 
   // Log the provided information
   console.log(`Form Details:
-  Company Name: ${companyName || 'Not provided'},
-  Number of Employees: ${numEmployees || 'Not provided'}`);
+  Company Name: ${companyName || 'null'},
+  Number of Employees: ${numEmployees || 'null'}`);
 
-  // Handle the form data as needed (e.g., save to a database)
-
-  // Return the response
-  return 'Success';
+  // Return the response with success status and the formData
+  return {
+    successStatus: 'Success',
+    formData: {
+      companyName: companyName || null,
+      numEmployees: numEmployees || null,
+    },
+  };
 }
 
 function calculateCarbonFootprint(flightDistance, averagePassengers) {
