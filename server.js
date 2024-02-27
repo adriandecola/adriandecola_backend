@@ -116,7 +116,7 @@ app.post('/form', async (req, res) => {
     const userMessage = req.body.message;
 
     // chat completion
-    const formInputs = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       messages: [
         {
           role: 'system',
@@ -137,7 +137,7 @@ app.post('/form', async (req, res) => {
     });
 
     // Send data back
-    console.log('Form Inputs: ', formInputs);
+    console.log('Form Inputs: ', completion.choices[0].message.content);
     res.json(formInputs);
   } catch (error) {
     console.error(error);
