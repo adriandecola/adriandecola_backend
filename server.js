@@ -123,13 +123,14 @@ app.post('/form', async (req, res) => {
           content:
             "You are a helpful assistant designed to identify and extract specific travel booking details from user messages. Your task is to analyze the text for certain keywords and phrases, and return the extracted values in JSON format. The key details to look for are: \
             travel type (which can be either 'round trip' or 'one-way'), \
-            initial airport (IATA code if possible), \
-            final airport (IATA code if possible), \
+            initial airport (IATA code if possible, city is fine), \
+            final airport (IATA code if possible, city is fine), \
             number of passengers (as a number), \
             and flight class (options include 'economy', 'premium economy', 'business', or 'first class'). \
             Please return the values with the exact notations: 'travelType', 'initialAirport', 'finalAirport', 'numberOfPassengers', and 'flightClass'. \
             If any detail is not mentioned, return 'not specified' for that field. \
-            Assume the discussion is about flights: given locations or cities are very likely the initial or final airports. ",
+            Assume the discussion is about flights: given locations or cities are very likely the initial or final airports. \
+            To emphasize: ALL location are referencing initial or final destinations/airports, be sure to include them in the response (converted to the correct IATA code if possible).",
         },
         { role: 'user', content: userMessage },
       ],
