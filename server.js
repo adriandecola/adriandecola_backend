@@ -137,7 +137,8 @@ app.post('/form', async (req, res) => {
     });
 
     // Send data back
-    console.log('Form Inputs: ', completion.choices[0].message.content);
+    const formInputs = completion.choices[0].message.content;
+    console.log('Form Inputs: ', formInputs);
     res.json(formInputs);
   } catch (error) {
     console.error(error);
