@@ -51,7 +51,7 @@ const openai = new OpenAI({
   organization: process.env.OPENAI_META_ORG,
   apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
-const assistantId = process.env.OPENAI_ASSISTANT_FORM_FILLER_ID;
+const assistantId = process.env.OPENAI_ASSISTANT_FLIGHT_ID;
 console.log('AssitantId: ', assistantId);
 
 /////////////////// Routes ///////////////////
@@ -109,6 +109,42 @@ app.post('/chat', async (req, res) => {
   }
 });
 
+// Route to hit for JSON form component grab requests
+app.post('/form', async (req, res) => {
+  console.log('Form endpoint hit');
+  try {
+    const userMessage = req.body.message;
+
+    // chat completion
+    const formInputs = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content:
+            "You are a helpful assistant designed to identify and extract specific travel booking details from user messages. Your task is to analyze the text for certain keywords and phrases, and return the extracted values in JSON format. The key details to look for are: \
+            travel type (which can be either 'round trip' or 'one-way'), \
+            initial airport (IATA code if possible), \
+            final airport (IATA code if possible), \
+            number of passengers (as a number), \
+            and flight class (options include 'economy', 'premium economy', 'business', or 'first class'). \
+            Please return the values with the exact notations: 'travelType', 'initialAirport', 'finalAirport', 'numberOfPassengers', and 'flightClass'. \
+            If any detail is not mentioned, return 'not specified' for that field.",
+        },
+        { role: 'user', content: userMessage },
+      ],
+      model: 'gpt-4-0125-preview',
+      response_format: { type: 'json_object' },
+    });
+
+    // Send data back
+    console.log('Form Inputs: ', formInputs);
+    res.json(formInputs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error.message);
+  }
+});
+
 // Route to hit for assistant requests
 app.post('/assistant', async (req, res) => {
   console.log('Assistant endpoint hit! ');
@@ -125,11 +161,9 @@ app.post('/assistant', async (req, res) => {
     // Getting threadId if one was created
     let threadId; //function scope
     if (req.body.threadId) {
-      console.log('in IF');
       threadId = req.body.threadId;
     } else {
       // Creating a thread
-      console.log('In ELSE');
       const thread = await openai.beta.threads.create();
       threadId = thread.id;
     }
