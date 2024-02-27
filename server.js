@@ -128,7 +128,8 @@ app.post('/form', async (req, res) => {
             number of passengers (as a number), \
             and flight class (options include 'economy', 'premium economy', 'business', or 'first class'). \
             Please return the values with the exact notations: 'travelType', 'initialAirport', 'finalAirport', 'numberOfPassengers', and 'flightClass'. \
-            If any detail is not mentioned, return 'not specified' for that field.",
+            If any detail is not mentioned, return 'not specified' for that field. \
+            Assume any location given are the initial or final airports. ",
         },
         { role: 'user', content: userMessage },
       ],
