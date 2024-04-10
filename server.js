@@ -297,7 +297,7 @@ app.post('/test', (req, res) => {
 });
 
 // Starting the server
-app.listen(port, 'localhost', () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server listening on port: ${port}`);
 });
 
