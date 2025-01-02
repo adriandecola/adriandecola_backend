@@ -298,8 +298,8 @@ app.post('/assistant', async (req, res) => {
 	}
 });
 
-app.post('/ecoclaim-assistant', async (req, res) => {
-	pass;
+app.post('/ecoclaim_assistant', async (req, res) => {
+	console.log('EcoClaim Assistant endpoint hit! ');
 });
 
 // Test route
