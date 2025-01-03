@@ -300,6 +300,7 @@ app.post('/assistant', async (req, res) => {
 
 app.post('/ecoclaim_assistant', async (req, res) => {
 	console.log('EcoClaim Assistant endpoint hit! ');
+	res.send('Hey from the backend');
 });
 
 // Test route
