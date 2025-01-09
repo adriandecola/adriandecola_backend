@@ -308,6 +308,7 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 	res.json({
 		assistantResponse: assistantResponse,
 		threadId: threadId,
+		passedReq: req,
 	});
 });
 
