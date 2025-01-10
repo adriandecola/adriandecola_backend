@@ -318,9 +318,11 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 		// 1. If threadId is null: create a new, empty thread //
 		////////////////////////////////////////////////////////
 		if (!threadId) {
-			threadId = await openai_ecoclaim.beta.threads.create().id;
+			const threadResponse = await openai_ecoclaim.beta.threads.create();
+			threadId = threadResponse.id;
 		}
 		// Logging for debugging
+		console.log('threadResponse: ', threadResponse);
 		console.log('threadId: ', threadId);
 		console.log('\n');
 
