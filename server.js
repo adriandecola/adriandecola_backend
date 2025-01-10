@@ -52,6 +52,11 @@ const openai_meta_carbon = new OpenAI({
 	organization: process.env.OPENAI_META_ORG,
 	apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
+// New way of authentication with project key for EcoClaim
+const openai_ecoclaim = new OpenAI({
+	organization: process.env.OPENAI_ECOCLAIM_ORGANIZATION_KEY,
+	project: process.env.OPENAI_ECOCLAIM_PROJECT_KEY,
+});
 const assistantId = process.env.OPENAI_ASSISTANT_FLIGHT_ID;
 console.log('AssitantId: ', assistantId);
 
@@ -299,17 +304,191 @@ app.post('/assistant', async (req, res) => {
 });
 
 app.post('/ecoclaim_assistant', async (req, res) => {
+	// Logging for debugging
 	console.log('EcoClaim Assistant endpoint hit! ');
 
-	// For testing
-	const assistantResponse = 'Hey from the backend';
-	const threadId = '12345';
+	// Destructuring the request body
+	const userMessage = req.body.message;
+	let threadId = req.body.threadId;
 
-	res.json({
-		assistantResponse: assistantResponse,
-		threadId: threadId,
-		passedReq: req,
-	});
+	try {
+		////////////////////////////////////////////////////////
+		// 1. If threadId is null: create a new, empty thread //
+		////////////////////////////////////////////////////////
+		if (!threadId) {
+			threadId = await openai_ecoclaim.beta.threads.create();
+		}
+		// Logging for debugging
+		console.log('threadId: ', threadId);
+		console.log('\n');
+
+		///////////////////////////////////////////////
+		// 2. Add the new user message to the thread //
+		///////////////////////////////////////////////
+		const newThreadMessages =
+			await openai_ecoclaim.beta.threads.messages.create(threadId, {
+				role: 'user',
+				content: userMessage,
+			});
+
+		///////////////////////////////////
+		// 3. Run the thread you created //
+		///////////////////////////////////
+		const run = await openai_ecoclaim.beta.threads.runs.create(threadId, {
+			assistant_id: process.env.OPENAI_ECOCLAIM_ASSISTANT_ID,
+		});
+		// Logging for debugging
+		console.log('New run created:', run.id);
+
+		//////////////////////////////////////////////////////////
+		// 4. Polling the run to add tool outputs, if required, //
+		//    until the run is complete or fails				//
+		//////////////////////////////////////////////////////////
+		let currentRun = run;
+		const MAX_POLL_ATTEMPTS = 20;
+		let attempt = 0;
+
+		while (attempt < MAX_POLL_ATTEMPTS) {
+			attempt++;
+			// Retrieve latest run status
+			currentRun = await openai_ecoclaim.beta.threads.runs.retrieve(
+				threadId,
+				currentRun.id
+			);
+
+			// If the run is completed or failed, break out of loop
+			if (
+				currentRun.status === 'completed' ||
+				currentRun.status === 'failed'
+			) {
+				break;
+			}
+
+			// If the run requires tool outputs
+			if (
+				currentRun.status === 'requires_action' &&
+				currentRun.required_action?.type === 'submit_tool_outputs'
+			) {
+				// The run object should tell us which tool calls are needed
+				const toolCalls =
+					currentRun.required_action.submit_tool_outputs
+						?.tool_calls || [];
+
+				// We'll build an array of outputs to submit (one for each tool call)
+				const outputsToSubmit = [];
+
+				for (const call of toolCalls) {
+					// The function name
+					const fnName = call.function.name;
+					// The arguments are stored as a JSON string
+					const fnArgsString = call.function.arguments;
+					// Parse the JSON arguments
+					const fnArgs = JSON.parse(fnArgsString || '{}');
+
+					let fnResult;
+
+					// For now, we only have "calculateCarbonEmissionsForAllCommonMaterials"
+					if (
+						fnName ===
+						'calculate_carbon_emissions_for_all_common_materials'
+					) {
+						// Call our function
+						fnResult =
+							calculateCarbonEmissionsForAllCommonMaterials(
+								fnArgs
+							);
+					} else {
+						// If you add more functions in the future, handle them here
+						fnResult = { error: `Unknown function: ${fnName}` };
+					}
+
+					// Prepare the output entry
+					outputsToSubmit.push({
+						tool_call_id: call.id,
+						// Must be a string
+						output: JSON.stringify(fnResult),
+					});
+				}
+
+				// Submit the tool outputs
+				const submittedRun =
+					await openai_ecoclaim.beta.threads.runs.submitToolOutputs(
+						threadId,
+						currentRun.id,
+						{
+							tool_outputs: outputsToSubmit,
+						}
+					);
+
+				// Update currentRun with the result from the submit step
+				currentRun = submittedRun;
+			}
+
+			// If we haven’t completed or failed yet, wait and try again
+			if (
+				currentRun.status !== 'completed' &&
+				currentRun.status !== 'failed'
+			) {
+				await new Promise((resolve) => setTimeout(resolve, 2000));
+			} else {
+				break;
+			}
+		}
+
+		////////////////////////////////////////////
+		// 5. Retrieving the assistant's response //
+		////////////////////////////////////////////
+		// Initialize an assistantResponse variable
+		let assistantResponse = 'No final assistant response found.';
+
+		// If completed, let's fetch all messages and find the latest assistant message
+		if (currentRun.status === 'completed') {
+			// 5a. List messages in the thread
+			const threadMessages =
+				await openai_ecoclaim.beta.threads.messages.list(threadId);
+
+			// 5b. The messages are returned in `threadMessages.data`.
+			//     We'll look for the **last** message from the assistant.
+			//     (Messages can be in chronological or reverse-chronological order
+			//      depending on how the endpoint returns them — here we check from last to first.)
+			const msgs = threadMessages.data;
+			for (let i = msgs.length - 1; i >= 0; i--) {
+				const msg = msgs[i];
+				// Check the role
+				if (msg.role === 'assistant') {
+					// If content is structured, each content item has a `.text.value`.
+					// We'll just grab the first chunk if it exists.
+					if (
+						msg.content &&
+						msg.content.length > 0 &&
+						msg.content[0].text
+					) {
+						assistantResponse = msg.content[0].text.value;
+					}
+					break;
+				}
+			}
+		} else if (currentRun.status === 'failed') {
+			assistantResponse = `Run failed: ${
+				currentRun.last_error?.message || ''
+			}`;
+		} else {
+			// If we exit the loop for another reason
+			assistantResponse = `Run ended with status: ${currentRun.status}`;
+		}
+
+		/////////////////////////////////////////////////////////////
+		// 6. Send the final response, including the assistant text //
+		/////////////////////////////////////////////////////////////
+		res.json({
+			assistantResponse: assistantResponse,
+			threadId: threadId,
+			passedReqBodt: req.body,
+		});
+	} catch (error) {
+		console.error('Error processing message: ', error);
+		res.status(500).send('Server error');
+	}
 });
 
 // Test route
@@ -375,4 +554,87 @@ function calculateCarbonFootprint(flightDistance, averagePassengers) {
 	return individualContribution;
 }
 
-////// Helper Functions for Ecoclaim Endpoint //////
+////////////////////////////////// Helper Functions for Ecoclaim Endpoint ///////////////////////////////////
+///////////////////////////// Beta polling function  ///////////////////////////////////////
+/**
+ * Poll the status of a run until it completes, fails (programatically times out), or requires tool outputs.
+ *
+ * @param {string} threadId     - The ID of the thread.
+ * @param {string} runId        - The ID of the run to poll.
+ * @param {object} openaiClient - The OpenAI client (e.g., openai_ecoclaim).
+ * @param {number} maxAttempts  - Max number of polling attempts before timing out.
+ * @param {number} intervalMs   - Milliseconds between polling attempts.
+ * @returns {Promise<object>}   - Returns the updated run object.
+ */
+async function pollRunStatus(
+	threadId,
+	runId,
+	openaiClient,
+	maxAttempts = 10,
+	intervalMs = 2000
+) {
+	let attempts = 0;
+	while (attempts < maxAttempts) {
+		attempts++;
+		const run = await openaiClient.beta.threads.runs.retrieve(
+			threadId,
+			runId
+		);
+
+		// If run is completed, failed, or requires tool outputs, return immediately
+		if (
+			run.status === 'completed' ||
+			run.status === 'failed' ||
+			(run.status === 'requires_action' &&
+				run.required_action?.type === 'submit_tool_outputs')
+		) {
+			return run;
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+	}
+
+	throw new Error(`Run polling timed out after ${maxAttempts} attempts.`);
+}
+
+///////////////////////////// Beta function for assistant to call ///////////////////////////////////////
+// probably no need for either of those checks as the assistant should fill out all fields and only fields
+// specified
+function calculateCarbonEmissionsForAllCommonMaterials(materials) {
+	// Emissions factors (kg CO₂ per kg of material)
+	const emissionsFactors = {
+		asphalt: 0.05, // Example: Asphalt generates 0.05 kg CO₂ per kg
+		brick_block: 0.03, // Example: Brick/Block generates 0.03 kg CO₂ per kg
+		cardboard: 0.02, // Example: Cardboard generates 0.02 kg CO₂ per kg
+		concrete: 0.1, // Example: Concrete generates 0.1 kg CO₂ per kg
+		drywall: 0.07, // Example: Drywall generates 0.07 kg CO₂ per kg
+		glass: 0.2, // Example: Glass generates 0.2 kg CO₂ per kg
+		landfill: 0.15, // Example: Landfill generates 0.15 kg CO₂ per kg
+		metal: 0.5, // Example: Metal generates 0.5 kg CO₂ per kg
+		plastic_hard: 0.4, // Example: Hard plastic generates 0.4 kg CO₂ per kg
+		plastic_soft: 0.3, // Example: Soft plastic generates 0.3 kg CO₂ per kg
+		wood: 0.01, // Example: Wood generates 0.01 kg CO₂ per kg
+	};
+
+	// Calculate emissions for each material
+	const emissions = {};
+	let totalEmissions = 0;
+
+	for (const material in materials) {
+		if (
+			materials.hasOwnProperty(material) &&
+			emissionsFactors[material] !== undefined
+		) {
+			// Calculate emissions for the current material
+			emissions[material] =
+				materials[material] * emissionsFactors[material];
+			// Add to the overall total emissions
+			totalEmissions += emissions[material];
+		}
+	}
+
+	// Add the total emissions to the result
+	emissions.total = totalEmissions;
+
+	return emissions;
+}
