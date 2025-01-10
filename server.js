@@ -53,6 +53,15 @@ const openai_meta_carbon = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY_META_ADRIANS,
 });
 // New way of authentication with project key for EcoClaim
+// for debugging
+console.log(
+	'OPENAI_ECOCLAIM_ORGANIZATION_KEY:',
+	process.env.OPENAI_ECOCLAIM_ORGANIZATION_KEY
+);
+console.log(
+	'OPENAI_ECOCLAIM_PROJECT_KEY:',
+	process.env.OPENAI_ECOCLAIM_PROJECT_KEY
+);
 const openai_ecoclaim = new OpenAI({
 	organization: process.env.OPENAI_ECOCLAIM_ORGANIZATION_KEY,
 	project: process.env.OPENAI_ECOCLAIM_PROJECT_KEY,
