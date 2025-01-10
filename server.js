@@ -65,6 +65,7 @@ console.log(
 const openai_ecoclaim = new OpenAI({
 	organization: process.env.OPENAI_ECOCLAIM_ORGANIZATION_KEY,
 	project: process.env.OPENAI_ECOCLAIM_PROJECT_KEY,
+	apiKey: process.env.OPENAI_ECOCLAIM_ADRIANS_API_KEY,
 });
 const assistantId = process.env.OPENAI_ASSISTANT_FLIGHT_ID;
 console.log('AssitantId: ', assistantId);
