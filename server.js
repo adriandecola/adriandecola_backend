@@ -452,6 +452,7 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 			const threadMessages =
 				await openai_ecoclaim.beta.threads.messages.list(threadId);
 
+			console.log('threadMessages:: ', threadMessages); ////////?**&^%&*&^
 			// 5b. The messages are returned in `threadMessages.data`.
 			//     We'll look for the **last** message from the assistant.
 			//     (Messages can be in chronological or reverse-chronological order
@@ -461,6 +462,7 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 				const msg = msgs[i];
 				// Check the role
 				if (msg.role === 'assistant') {
+					console.log('i::', i); //////////////////////////(*&^&*(*&))
 					// If content is structured, each content item has a `.text.value`.
 					// We'll just grab the first chunk if it exists.
 					if (
@@ -468,6 +470,7 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 						msg.content.length > 0 &&
 						msg.content[0].text
 					) {
+						console.log('msg::', msg); ////////$%^&*&^%$
 						assistantResponse = msg.content[0].text.value;
 					}
 					break;
