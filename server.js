@@ -54,16 +54,7 @@ const openai_meta_carbon = new OpenAI({
 });
 // New way of authentication with project key for EcoClaim
 // for debugging
-console.log(
-	'OPENAI_ECOCLAIM_ORGANIZATION_KEY:',
-	process.env.OPENAI_ECOCLAIM_ORGANIZATION_KEY
-);
-console.log(
-	'OPENAI_ECOCLAIM_PROJECT_KEY:',
-	process.env.OPENAI_ECOCLAIM_PROJECT_KEY
-);
 const openai_ecoclaim = new OpenAI({
-	defaultHeaders: { 'OpenAI-Beta': 'assistants=v2' },
 	organization: process.env.OPENAI_ECOCLAIM_ORGANIZATION_KEY,
 	project: process.env.OPENAI_ECOCLAIM_PROJECT_KEY,
 	apiKey: process.env.OPENAI_ECOCLAIM_ADRIANS_API_KEY,
@@ -327,7 +318,7 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 		// 1. If threadId is null: create a new, empty thread //
 		////////////////////////////////////////////////////////
 		if (!threadId) {
-			threadId = await openai_ecoclaim.beta.threads.create();
+			threadId = await openai_ecoclaim.beta.threads.create().id;
 		}
 		// Logging for debugging
 		console.log('threadId: ', threadId);
