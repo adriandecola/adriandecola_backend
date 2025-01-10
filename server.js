@@ -485,6 +485,8 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 		/////////////////////////////////////////////////////////////
 		// 6. Send the final response, including the assistant text //
 		/////////////////////////////////////////////////////////////
+		// For debugging
+		console.log('Assistant Response ::', assistantResponse);
 		res.json({
 			assistantResponse: assistantResponse,
 			threadId: threadId,
