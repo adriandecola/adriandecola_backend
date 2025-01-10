@@ -477,9 +477,12 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 				}
 			}
 		} else if (currentRun.status === 'failed') {
-			assistantResponse = `Run failed: ${
-				currentRun.last_error.json() || ''
-			}`;
+			assistantResponse = `Run failed: ${currentRun.last_error || ''}`;
+			console.log(
+				'currentrun last error code:: ',
+				currentRun.last_error.code
+			); //////?$%^&*(*&^%$#%^&*())
+			console.log('current run last error message');
 		} else {
 			// If we exit the loop for another reason
 			assistantResponse = `Run ended with status: ${currentRun.status}`;
