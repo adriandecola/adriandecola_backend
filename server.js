@@ -63,6 +63,7 @@ console.log(
 	process.env.OPENAI_ECOCLAIM_PROJECT_KEY
 );
 const openai_ecoclaim = new OpenAI({
+	defaultHeaders: { 'OpenAI-Beta': 'assistants=v2' },
 	organization: process.env.OPENAI_ECOCLAIM_ORGANIZATION_KEY,
 	project: process.env.OPENAI_ECOCLAIM_PROJECT_KEY,
 	apiKey: process.env.OPENAI_ECOCLAIM_ADRIANS_API_KEY,
