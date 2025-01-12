@@ -456,7 +456,17 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 			const msgs = threadMessages.data;
 
 			// Let's grab the most recent message
-			assistantResponse = msgs.content[0].text.value;
+			const msg = msgs[0];
+
+			// Makes sure there is content in the message and grabs text response from it
+			if (msg.content && msg.content.length > 0 && msg.content[0].text) {
+				// Console logging for debugging
+				console.log('msg::', msg);
+
+				assistantResponse = msg.content[0].text.value;
+			} else {
+				throw new Error("No message found in the assistant's response");
+			}
 		} else if (currentRun.status === 'failed') {
 			assistantResponse = `Run failed: ${currentRun.last_error || ''}`;
 			console.log(
