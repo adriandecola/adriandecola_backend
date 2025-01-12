@@ -452,30 +452,11 @@ app.post('/ecoclaim_assistant', async (req, res) => {
 			const threadMessages =
 				await openai_ecoclaim.beta.threads.messages.list(threadId);
 
-			console.log('threadMessages:: ', threadMessages); ////////?**&^%&*&^
-			// 5b. The messages are returned in `threadMessages.data`.
-			//     We'll look for the **last** message from the assistant.
-			//     (Messages can be in chronological or reverse-chronological order
-			//      depending on how the endpoint returns them — here we check from last to first.)
+			// The messages are returned in `threadMessages.data`.
 			const msgs = threadMessages.data;
-			for (let i = msgs.length - 1; i >= 0; i--) {
-				const msg = msgs[i];
-				// Check the role
-				if (msg.role === 'assistant') {
-					console.log('i::', i); //////////////////////////(*&^&*(*&))
-					// If content is structured, each content item has a `.text.value`.
-					// We'll just grab the first chunk if it exists.
-					if (
-						msg.content &&
-						msg.content.length > 0 &&
-						msg.content[0].text
-					) {
-						console.log('msg::', msg); ////////$%^&*&^%$
-						assistantResponse = msg.content[0].text.value;
-					}
-					break;
-				}
-			}
+
+			// Let's grab the most recent message
+			assistantResponse = msgs.content[0].text.value;
 		} else if (currentRun.status === 'failed') {
 			assistantResponse = `Run failed: ${currentRun.last_error || ''}`;
 			console.log(
